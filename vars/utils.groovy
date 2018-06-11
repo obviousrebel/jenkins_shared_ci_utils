@@ -59,6 +59,7 @@ def run(configs, concurrent = true) {
         //    }
         //}
 
+        println("Build mode = ${myconfig.build_mode}")
         if (myconfig.build_mode) {
             myconfig.name = myconfig.build_mode
             warning = true
