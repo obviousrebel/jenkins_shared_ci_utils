@@ -40,15 +40,51 @@ def scm_checkout(skip_disable=false) {
 //                          true when no value is provided.
 def run(configs, concurrent = true) {
     def tasks = [:]
+    def warning = false
+    def both = false
+    def dep_msg = "WARNING: BuildConfig.build_mode will be deprecated in favor" +
+                  " of .name in a future release of this support library. " +
+                  "Please replace all instances of '.build_mode' in your " +
+                  "Jenkinsfile with '.name'."
+    def both_msg = "WARNING: Both BuildConfig.build_mode (to be deprecated) and " +
+                   " BuildConfig.name have been used in the Jenkinsfile. The " +
+                   "assignment to '.name' will be used for this job. " +
+                   "  Assignment to '.build_mode' IS BEING IGNORED!"
     for (config in configs) {
+
+        warning = false
+        both = false
+        if (config.name) {
+            if (config.build_mode) {
+                warning = true
+                both = true
+            }
+            name = config.name
+        } else {
+            if (config.build_mode) {
+                config.name = config.build_mode
+                warning = true
+            }
+        }
 
         def myconfig = new BuildConfig() // MUST be inside for loop.
         myconfig = SerializationUtils.clone(config)
 
+
         // Code defined within 'tasks' is eventually executed on a separate node.
         // 'tasks' is a java.util.LinkedHashMap, which preserves insertion order.
-        tasks["${config.nodetype}/${config.build_mode}"] = {
+        tasks["${config.nodetype}/${config.name}"] = {
             node(config.nodetype) {
+
+                // Staged deprecation of BuildConfig '.build_mode' nomenclature in favor of
+                // '.name'.
+                if (warning) {
+                    println(dep_msg)
+                }
+                if (both) {
+                    println(both_msg)
+                }
+
                 def runtime = []
                 // If conda packages were specified, create an environment containing
                 // them and then 'activate' it.
@@ -121,7 +157,7 @@ def run(configs, concurrent = true) {
                     runtime.add(var)
                 }
                 withEnv(runtime) {
-                    stage("Build (${myconfig.build_mode})") {
+                    stage("Build (${myconfig.name})") {
                         unstash "source_tree"
                         for (cmd in myconfig.build_cmds) {
                             sh(script: cmd)
@@ -129,7 +165,7 @@ def run(configs, concurrent = true) {
                     }
                     if (myconfig.test_cmds.size() > 0) {
                         try {
-                            stage("Test (${myconfig.build_mode})") {
+                            stage("Test (${myconfig.name})") {
                                 for (cmd in myconfig.test_cmds) {
                                     sh(script: cmd)
                                 }
