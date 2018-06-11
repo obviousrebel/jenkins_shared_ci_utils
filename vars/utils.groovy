@@ -73,7 +73,8 @@ def run(configs, concurrent = true) {
 
         // Code defined within 'tasks' is eventually executed on a separate node.
         // 'tasks' is a java.util.LinkedHashMap, which preserves insertion order.
-        tasks["${config.nodetype}/${config.name}"] = {
+        //tasks["${config.nodetype}/${config.name}"] = {
+        tasks["${myconfig.nodetype}/${myconfig.name}"] = {
             node(config.nodetype) {
 
                 // Staged deprecation of BuildConfig '.build_mode' nomenclature in favor of
