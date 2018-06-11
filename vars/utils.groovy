@@ -47,19 +47,21 @@ def run(configs, concurrent = true) {
         myconfig = SerializationUtils.clone(config)
 
         // Staged deprecation of BuildConfig.build_mode
-        def warning// = false
-        def both// = false
-        if (myconfig.name) {
-            if (myconfig.build_mode) {
-                warning = true
-                both = true
-            }
-            name = myconfig.name
-        } else {
-            if (myconfig.build_mode) {
-                myconfig.name = myconfig.build_mode
-                warning = true
-            }
+        def warning = false
+        //if (myconfig.name) {
+        //    if (myconfig.build_mode) {
+        //        warning = true
+        //    }
+        //} else {
+        //    if (myconfig.build_mode) {
+        //        myconfig.name = myconfig.build_mode
+        //        warning = true
+        //    }
+        //}
+
+        if (myconfig.build_mode) {
+            myconfig.name = myconfig.build_mode
+            warning = true
         }
 
         // Code defined within 'tasks' is eventually executed on a separate node.
@@ -74,12 +76,6 @@ def run(configs, concurrent = true) {
                         " of .name in a future release of this support library. " +
                         "Please replace all instances of '.build_mode' in your " +
                         "Jenkinsfile with '.name'.")
-                }
-                if (both) {
-                    println("WARNING: Both BuildConfig.build_mode (to be deprecated) and " +
-                        " BuildConfig.name have been used in the Jenkinsfile. The " +
-                        "assignment to '.name' will be used for this job. " +
-                        "  ASSIGNMENT TO '.build_mode' IS BEING IGNORED!")
                 }
 
                 def runtime = []
