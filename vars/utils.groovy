@@ -52,24 +52,24 @@ def run(configs, concurrent = true) {
                    "  Assignment to '.build_mode' IS BEING IGNORED!"
     for (config in configs) {
 
-        warning = false
-        both = false
-        if (config.name) {
-            if (config.build_mode) {
-                warning = true
-                both = true
-            }
-            name = config.name
-        } else {
-            if (config.build_mode) {
-                config.name = config.build_mode
-                warning = true
-            }
-        }
 
         def myconfig = new BuildConfig() // MUST be inside for loop.
         myconfig = SerializationUtils.clone(config)
 
+        warning = false
+        both = false
+        if (myconfig.name) {
+            if (myconfig.build_mode) {
+                warning = true
+                both = true
+            }
+            name = myconfig.name
+        } else {
+            if (myconfig.build_mode) {
+                myconfig.name = myconfig.build_mode
+                warning = true
+            }
+        }
 
         // Code defined within 'tasks' is eventually executed on a separate node.
         // 'tasks' is a java.util.LinkedHashMap, which preserves insertion order.
