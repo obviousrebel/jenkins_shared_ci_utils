@@ -47,8 +47,8 @@ def run(configs, concurrent = true) {
         myconfig = SerializationUtils.clone(config)
 
         // Staged deprecation of BuildConfig.build_mode
-        def warning = false
-        def both = false
+        def warning// = false
+        def both// = false
         if (myconfig.name) {
             if (myconfig.build_mode) {
                 warning = true
