@@ -40,24 +40,15 @@ def scm_checkout(skip_disable=false) {
 //                          true when no value is provided.
 def run(configs, concurrent = true) {
     def tasks = [:]
-    def warning = false
-    def both = false
-    def dep_msg = "WARNING: BuildConfig.build_mode will be deprecated in favor" +
-                  " of .name in a future release of this support library. " +
-                  "Please replace all instances of '.build_mode' in your " +
-                  "Jenkinsfile with '.name'."
-    def both_msg = "WARNING: Both BuildConfig.build_mode (to be deprecated) and " +
-                   " BuildConfig.name have been used in the Jenkinsfile. The " +
-                   "assignment to '.name' will be used for this job. " +
-                   "  Assignment to '.build_mode' IS BEING IGNORED!"
-    for (config in configs) {
 
+    for (config in configs) {
 
         def myconfig = new BuildConfig() // MUST be inside for loop.
         myconfig = SerializationUtils.clone(config)
 
-        warning = false
-        both = false
+        // Staged deprecation of BuildConfig.build_mode
+        def warning = false
+        def both = false
         if (myconfig.name) {
             if (myconfig.build_mode) {
                 warning = true
@@ -73,17 +64,22 @@ def run(configs, concurrent = true) {
 
         // Code defined within 'tasks' is eventually executed on a separate node.
         // 'tasks' is a java.util.LinkedHashMap, which preserves insertion order.
-        //tasks["${config.nodetype}/${config.name}"] = {
         tasks["${myconfig.nodetype}/${myconfig.name}"] = {
             node(config.nodetype) {
 
                 // Staged deprecation of BuildConfig '.build_mode' nomenclature in favor of
                 // '.name'.
                 if (warning) {
-                    println(dep_msg)
+                    println("WARNING: BuildConfig.build_mode will be deprecated in favor" +
+                        " of .name in a future release of this support library. " +
+                        "Please replace all instances of '.build_mode' in your " +
+                        "Jenkinsfile with '.name'.")
                 }
                 if (both) {
-                    println(both_msg)
+                    println("WARNING: Both BuildConfig.build_mode (to be deprecated) and " +
+                        " BuildConfig.name have been used in the Jenkinsfile. The " +
+                        "assignment to '.name' will be used for this job. " +
+                        "  ASSIGNMENT TO '.build_mode' IS BEING IGNORED!")
                 }
 
                 def runtime = []
