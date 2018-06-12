@@ -47,22 +47,9 @@ def run(configs, concurrent = true) {
         myconfig = SerializationUtils.clone(config)
 
         // Staged deprecation of BuildConfig.build_mode
-        def warning = false
-        //if (myconfig.name) {
-        //    if (myconfig.build_mode) {
-        //        warning = true
-        //    }
-        //} else {
-        //    if (myconfig.build_mode) {
-        //        myconfig.name = myconfig.build_mode
-        //        warning = true
-        //    }
-        //}
-
         println("Build mode = ${myconfig.build_mode}")
         if (myconfig.build_mode) {
             myconfig.name = myconfig.build_mode
-            warning = true
         }
 
         // Code defined within 'tasks' is eventually executed on a separate node.
@@ -72,7 +59,7 @@ def run(configs, concurrent = true) {
 
                 // Staged deprecation of BuildConfig '.build_mode' nomenclature in favor of
                 // '.name'.
-                if (warning) {
+                if (myconfig.build_mode) {
                     println("WARNING: BuildConfig.build_mode will be deprecated in favor" +
                         " of .name in a future release of this support library. " +
                         "Please replace all instances of '.build_mode' in your " +
