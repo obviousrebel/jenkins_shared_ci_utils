@@ -148,6 +148,7 @@ def run(configs, concurrent = true) {
                             }
                         }
                         finally {
+                            println("myconfig.test_configs = ${myconfig.test_configs}")
                             if (myconfig.test_configs.size() > 0) {
                                 stage("Artifactory (${myconfig.name})") {
                                     def buildInfo = Artifactory.newBuildInfo()
