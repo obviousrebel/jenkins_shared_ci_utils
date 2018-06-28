@@ -163,61 +163,60 @@ def run(configs, concurrent = true) {
                             } else {
                                 println("No .xml files found in workspace. Test report ingestion skipped.")
                             }
-                        }
-                    }
+                            if (myconfig.test_configs.size() > 0) {
+                                stage("Artifactory (${myconfig.name})") {
+                                    def buildInfo = Artifactory.newBuildInfo()
+                                    buildInfo.env.capture = true
+                                    buildInfo.env.collect()
+                                    def server
 
-                    if (myconfig.test_configs.size() > 0) {
-                        stage("Artifactory (${myconfig.name})") {
-                            def buildInfo = Artifactory.newBuildInfo()
-                            buildInfo.env.capture = true
-                            buildInfo.env.collect()
-                            def server
+                                    println("Scanning for directives...")
+                                    for (artifact in myconfig.test_configs) {
+                                        server = Artifactory.server artifact.server_id
 
-                            println("Scanning for directives...")
-                            for (artifact in myconfig.test_configs) {
-                                server = Artifactory.server artifact.server_id
+                                        // Construct absolute path to data
+                                        def path = FilenameUtils.getFullPath(
+                                                    "${env.WORKSPACE}/${artifact.root}"
+                                        )
 
-                                // Construct absolute path to data
-                                def path = FilenameUtils.getFullPath(
-                                            "${env.WORKSPACE}/${artifact.root}"
-                                )
+                                        // Record listing of all files starting at ${path}
+                                        // (Native Java and Groovy approaches will not work here)
+                                        sh(script: "find ${path} -type f",
+                                           returnStdout: true).trim().tokenize('\n').each {
 
-                                // Record listing of all files starting at ${path}
-                                // (Native Java and Groovy approaches will not work here)
-                                sh(script: "find ${path} -type f",
-                                   returnStdout: true).trim().tokenize('\n').each {
+                                            // Semi-wildcard matching of JSON input files
+                                            // ex:
+                                            //      it = "test_1234_result.json"
+                                            //      artifact.match_prefix = "(.*)_result"
+                                            //
+                                            //      pattern becomes: (.*)_result(.*)\\.json
+                                            if (it.matches(
+                                                    artifact.match_prefix + '(.*)\\.json')) {
+                                                def basename = FilenameUtils.getBaseName(it)
+                                                def data = readFile(it)
 
-                                    // Semi-wildcard matching of JSON input files
-                                    // ex:
-                                    //      it = "test_1234_result.json"
-                                    //      artifact.match_prefix = "(.*)_result"
-                                    //
-                                    //      pattern becomes: (.*)_result(.*)\\.json
-                                    if (it.matches(
-                                            artifact.match_prefix + '(.*)\\.json')) {
-                                        def basename = FilenameUtils.getBaseName(it)
-                                        def data = readFile(it)
+                                                // Store JSON in a logical map
+                                                // i.e. ["basename": [data]]
+                                                artifact.insert(basename, data)
+                                            }
+                                        } // end find.each
 
-                                        // Store JSON in a logical map
-                                        // i.e. ["basename": [data]]
-                                        artifact.insert(basename, data)
-                                    }
-                                } // end find.each
+                                        // Submit each request to the Artifactory server
+                                        artifact.data.each { blob ->
+                                            println("Ingesting: ${blob.key}")
+                                            println(JsonOutput.prettyPrint(blob.value))
+                                            def bi_temp = server.upload spec: blob.value
+                                            buildInfo.append bi_temp
+                                        }
 
-                                // Submit each request to the Artifactory server
-                                artifact.data.each { blob ->
-                                    println("Ingesting: ${blob.key}")
-                                    println(JsonOutput.prettyPrint(blob.value))
-                                    def bi_temp = server.upload spec: blob.value
-                                    buildInfo.append bi_temp
-                                }
+                                    } // end for-loop
 
-                            } // end for-loop
+                                    server.publishBuildInfo buildInfo
 
-                            server.publishBuildInfo buildInfo
-
-                        } // end stage Artifactory
-                    } // end test_configs for-loop
+                                } // end stage Artifactory
+                            } // end test_configs for-loop
+                        } // end test test_cmd finally clause
+                    } // end stage test_cmd
                 } // end withEnv
             } // end node
         } //end tasks
