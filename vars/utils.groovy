@@ -148,21 +148,6 @@ def run(configs, concurrent = true) {
                             }
                         }
                         finally {
-                            // If a non-JUnit format .xml file exists in the
-                            // root of the workspace, the XUnitBuilder report
-                            // ingestion will fail.
-                            report_exists = sh(script: "test -e *.xml", returnStatus: true)
-                            if (report_exists == 0) {
-                                step([$class: 'XUnitBuilder',
-                                    thresholds: [
-                                    [$class: 'SkippedThreshold', unstableThreshold: "${myconfig.skippedUnstableThresh}"],
-                                    [$class: 'SkippedThreshold', failureThreshold: "${myconfig.skippedFailureThresh}"],
-                                    [$class: 'FailedThreshold', unstableThreshold: "${myconfig.failedUnstableThresh}"],
-                                    [$class: 'FailedThreshold', failureThreshold: "${myconfig.failedFailureThresh}"]],
-                                    tools: [[$class: 'JUnitType', pattern: '*.xml']]])
-                            } else {
-                                println("No .xml files found in workspace. Test report ingestion skipped.")
-                            }
                             if (myconfig.test_configs.size() > 0) {
                                 stage("Artifactory (${myconfig.name})") {
                                     def buildInfo = Artifactory.newBuildInfo()
@@ -214,7 +199,23 @@ def run(configs, concurrent = true) {
                                     server.publishBuildInfo buildInfo
 
                                 } // end stage Artifactory
-                            } // end test_configs for-loop
+                            } // end test_configs check
+
+                            // If a non-JUnit format .xml file exists in the
+                            // root of the workspace, the XUnitBuilder report
+                            // ingestion will fail.
+                            report_exists = sh(script: "test -e *.xml", returnStatus: true)
+                            if (report_exists == 0) {
+                                step([$class: 'XUnitBuilder',
+                                    thresholds: [
+                                    [$class: 'SkippedThreshold', unstableThreshold: "${myconfig.skippedUnstableThresh}"],
+                                    [$class: 'SkippedThreshold', failureThreshold: "${myconfig.skippedFailureThresh}"],
+                                    [$class: 'FailedThreshold', unstableThreshold: "${myconfig.failedUnstableThresh}"],
+                                    [$class: 'FailedThreshold', failureThreshold: "${myconfig.failedFailureThresh}"]],
+                                    tools: [[$class: 'JUnitType', pattern: '*.xml']]])
+                            } else {
+                                println("No .xml files found in workspace. Test report ingestion skipped.")
+                            }
                         } // end test test_cmd finally clause
                     } // end stage test_cmd
                 } // end withEnv
