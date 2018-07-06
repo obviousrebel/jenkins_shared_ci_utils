@@ -148,15 +148,23 @@ def run(configs, concurrent = true) {
                             }
                         }
                         finally {
-                            println("myconfig.test_configs = ${myconfig.test_configs}")
+                            // Perform Artifactory upload if required
                             if (myconfig.test_configs.size() > 0) {
                                 stage("Artifactory (${myconfig.name})") {
                                     def buildInfo = Artifactory.newBuildInfo()
+
+                                    // Define artifact retention scheme
+                                    // Defaults: see DataConfig.groovy
+                                    buildInfo.retention \
+                                        maxBuilds: artifact.keep_builds \
+                                        maxDays: artifact.keep_days \
+                                        deleteBuildArtifacts: !artifact.keep_data
+
                                     buildInfo.env.capture = true
                                     buildInfo.env.collect()
                                     def server
 
-                                    println("Scanning for directives...")
+                                    //println("Scanning for directives...")
                                     for (artifact in myconfig.test_configs) {
                                         server = Artifactory.server artifact.server_id
 
@@ -166,7 +174,8 @@ def run(configs, concurrent = true) {
                                         )
 
                                         // Record listing of all files starting at ${path}
-                                        // (Native Java and Groovy approaches will not work here)
+                                        // (Native Java and Groovy approaches will not
+                                        // work here)
                                         sh(script: "find ${path} -type f",
                                            returnStdout: true).trim().tokenize('\n').each {
 
@@ -189,8 +198,8 @@ def run(configs, concurrent = true) {
 
                                         // Submit each request to the Artifactory server
                                         artifact.data.each { blob ->
-                                            println("Ingesting: ${blob.key}")
-                                            println(JsonOutput.prettyPrint(blob.value))
+                                            //println("Ingesting: ${blob.key}")
+                                            //println(JsonOutput.prettyPrint(blob.value))
                                             def bi_temp = server.upload spec: blob.value
                                             buildInfo.append bi_temp
                                         }
