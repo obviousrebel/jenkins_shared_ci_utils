@@ -153,13 +153,6 @@ def run(configs, concurrent = true) {
                                 stage("Artifactory (${myconfig.name})") {
                                     def buildInfo = Artifactory.newBuildInfo()
 
-                                    // Define artifact retention scheme
-                                    // Defaults: see DataConfig.groovy
-                                    buildInfo.retention \
-                                        maxBuilds: artifact.keep_builds, \
-                                        maxDays: artifact.keep_days, \
-                                        deleteBuildArtifacts: !artifact.keep_data
-
                                     buildInfo.env.capture = true
                                     buildInfo.env.collect()
                                     def server
@@ -201,6 +194,15 @@ def run(configs, concurrent = true) {
                                             //println("Ingesting: ${blob.key}")
                                             //println(JsonOutput.prettyPrint(blob.value))
                                             def bi_temp = server.upload spec: blob.value
+
+                                            // Define retention scheme
+                                            // Defaults: see DataConfig.groovy
+                                            bi_temp.retention \
+                                                maxBuilds: artifact.keep_builds, \
+                                                maxDays: artifact.keep_days, \
+                                                deleteBuildArtifacts: !artifact.keep_data
+
+
                                             buildInfo.append bi_temp
                                         }
 
