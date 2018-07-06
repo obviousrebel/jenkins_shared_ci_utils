@@ -155,9 +155,9 @@ def run(configs, concurrent = true) {
 
                                     // Define artifact retention scheme
                                     // Defaults: see DataConfig.groovy
-                                    buildInfo.retention 
-                                        maxBuilds: artifact.keep_builds,
-                                        maxDays: artifact.keep_days,
+                                    buildInfo.retention \
+                                        maxBuilds: artifact.keep_builds, \
+                                        maxDays: artifact.keep_days, \
                                         deleteBuildArtifacts: !artifact.keep_data
 
                                     buildInfo.env.capture = true
