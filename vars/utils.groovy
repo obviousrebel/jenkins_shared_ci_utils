@@ -135,6 +135,10 @@ def run(configs, concurrent = true) {
                 }
                 withEnv(runtime) {
                     stage("Build (${myconfig.name})") {
+                        // When running on a real system Jenkins leaves behind a populated
+                        // 'job@#' workspace directory. It needs to be purged for unstash
+                        // to be successful.
+                        deleteDir()
                         unstash "source_tree"
                         for (cmd in myconfig.build_cmds) {
                             sh(script: cmd)
