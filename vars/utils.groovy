@@ -231,8 +231,7 @@ def test_summary_notify(single_issue) {
 def run(configs, concurrent = true) {
 
     // Split off any JobConfig object, leaving the config objects.
-    def BuildConfig ljobconfig = new JobConfig ()  // Spawn a job config with defaults.
-    def lconfigs = []
+    def ljobconfig = null
     configs.eachWithIndex { config, index ->
         if (config.getClass() == JobConfig) {
             ljobconfig = config
@@ -488,6 +487,9 @@ def run(configs, concurrent = true) {
 
     node("on-master") {
         stage("Post-build") {
+            if (ljobconfig == null) {
+                ljobconfig = new JobConfig()
+            }
             if (ljobconfig.post_test_summary) {
                 test_summary_notify(ljobconfig.all_posts_in_same_issue)
             }
