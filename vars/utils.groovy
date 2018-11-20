@@ -231,7 +231,7 @@ def test_summary_notify(single_issue) {
 def run(configs, concurrent = true) {
 
     // Split off any JobConfig object, leaving the config objects.
-    def ljobconfig = null
+    def BuildConfig ljobconfig = new JobConfig ()  // Spawn a job config with defaults.
     def lconfigs = []
     configs.eachWithIndex { config, index ->
         if (config.getClass() == JobConfig) {
