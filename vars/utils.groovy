@@ -443,6 +443,8 @@ def run(configs, concurrent = true) {
                             // root of the workspace, the XUnitBuilder report
                             // ingestion will fail.
                             report_exists = sh(script: "test -e *.xml", returnStatus: true)
+                            println("failedUnstableThresh: ${myconfig.failedUnstableThresh}")
+                            println("failedFailureThresh: ${myconfig.failedFailureThresh}")
                             if (report_exists == 0) {
                                 step([$class: 'XUnitBuilder',
                                     thresholds: [
