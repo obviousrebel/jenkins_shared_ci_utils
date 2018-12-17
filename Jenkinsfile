@@ -1,7 +1,8 @@
 println("env.BRANCH_NAME = ${env.BRANCH_NAME}")
 
+def library_spec = "utils@${env.BRANCH_NAME}"
 //@Library('utils@refactor') _
-@Library("utils@${env.BRANCH_NAME}") _
+@Library(library_spec) _
 
 // [skip ci] and [ci skip] have no effect here.
 if (utils.scm_checkout(['skip_disable':true])) return
