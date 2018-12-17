@@ -31,6 +31,10 @@ def postGithubIssue(reponame, username, password, subject, message) {
 // @return skip_job  int  Status of clone step, to be tested to determine
 //                        need to abort from Jenkinsfile. 
 def scm_checkout(args = ['skip_disable':false]) {
+    println("*-*-*-*-*-*-*")
+    println("*-*-*-*-*-*-*")
+    println("*-*-*-*-*-*-*")
+    println("*-*-*-*-*-*-*")
     skip_job = 0
     node("on-master") {
         stage("Setup") {
