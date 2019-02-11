@@ -263,7 +263,7 @@ def processTestReport(config, index) {
     // Process the XML results file to include the build config name as a prefix
     // on each test name to make it more obvious from where each result originates.
     if (report_exists == 0) {
-        repfile = sh(script:"find *.xml", returnStdout: true)
+        repfile = sh(script:"find *.xml", returnStdout: true).trim()
         command = "cp ${repfile} ${repfile}.modified"
         println("COMMAND - ${command}")
         sh(script:command)
