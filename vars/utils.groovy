@@ -254,19 +254,18 @@ def testSummaryNotify(single_issue) {
 def processTestReport(config, index) {
     def config_name = config.name
     report_exists = sh(script: "test -e *.xml", returnStatus: true)
-    def thresh_summary = "failedUnstableThresh: ${config.failedUnstableThresh}\n" +
+    def threshold_summary = "failedUnstableThresh: ${config.failedUnstableThresh}\n" +
         "failedFailureThresh: ${config.failedFailureThresh}\n" +
         "skippedUnstableThresh: ${config.skippedUnstableThresh}\n" +
         "skippedFailureThresh: ${config.skippedFailureThresh}"
-    println(thresh_summary)
+    println(threshold_summary)
 
     // Process the XML results file to include the build config name as a prefix
     // on each test name to make it more obvious from where each result originates.
-    def repfile = sh(script:"ls *.xml", returnStdout: true)
-    sh(script:"cp ${repfile} ${repfile}.modified")
-    sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml.modified")
-
     if (report_exists == 0) {
+        repfile = sh(script:"find *.xml", returnStdout: true)
+        sh(script:"cp ${repfile} ${repfile}.modified")
+        sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml.modified")
         step([$class: 'XUnitBuilder',
             thresholds: [
             [$class: 'SkippedThreshold', unstableThreshold: "${config.skippedUnstableThresh}"],
