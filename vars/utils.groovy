@@ -262,7 +262,8 @@ def processTestReport(config, index) {
 
     // Process the XML results file to include the build config name as a prefix
     // on each test name to make it more obvious from where each result originates.
-    sh(script:"for file in *.xml; do cp $file $file.modified; done")
+    def repfile = sh(script:"ls *.xml", returnStdout: true)
+    sh(script:"cp ${repfile} ${repfile}.modified")
     sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml.modified")
 
     if (report_exists == 0) {
