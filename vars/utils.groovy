@@ -264,7 +264,8 @@ def processTestReport(config, index) {
     // on each test name to make it more obvious from where each result originates.
     if (report_exists == 0) {
         repfile = sh(script:"find *.xml", returnStdout: true)
-        sh(script:"cp ${repfile} ${repfile}.modified")
+        command = "cp ${repfile} ${repfile}.modified"
+        sh(script:command)
         sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml.modified")
         step([$class: 'XUnitBuilder',
             thresholds: [
