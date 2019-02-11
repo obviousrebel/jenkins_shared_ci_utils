@@ -416,6 +416,8 @@ def buildAndTest(config, index) {
 
             } // end test test_cmd finally clause
         } // end if(config.test_cmds...)
+        // Dump the conda environment definition to a file.
+        sh(script: "${env.WORKSPACE}/miniconda/bin/conda list --explicit > env_dump_${index}.txt")
 
     } // end withEnv
 }
