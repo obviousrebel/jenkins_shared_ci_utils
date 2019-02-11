@@ -262,7 +262,8 @@ def processTestReport(config, index) {
 
     // Process the XML results file to include the build config name as a prefix
     // on each test name to make it more obvious from where each result originates.
-    sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml")
+    sh(script:"for file in *.xml; do cp $file $file.modified; done")
+    sh(script:"sed -i 's/ name=\"/ name=\"[${config.name}] /g' *.xml.modified")
 
     if (report_exists == 0) {
         step([$class: 'XUnitBuilder',
@@ -271,7 +272,7 @@ def processTestReport(config, index) {
             [$class: 'SkippedThreshold', failureThreshold: "${config.skippedFailureThresh}"],
             [$class: 'FailedThreshold', unstableThreshold: "${config.failedUnstableThresh}"],
             [$class: 'FailedThreshold', failureThreshold: "${config.failedFailureThresh}"]],
-            tools: [[$class: 'JUnitType', pattern: '*.xml']]])
+            tools: [[$class: 'JUnitType', pattern: '*.xml.modified']]])
     
     } else {
         println("No .xml files found in workspace. Test report ingestion skipped.")
