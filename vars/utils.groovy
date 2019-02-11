@@ -414,7 +414,10 @@ def buildAndTest(config, index) {
                 processTestReport(config, index)
 
             } // end test test_cmd finally clause
-        } // end stage test_cmd
+        } // end if(config.test_cmds...)
+        // Dump the conda environment definition to a file.
+        sh(script: "conda list --explicit > env_dump_${index}.txt")
+
     } // end withEnv
 }
 
