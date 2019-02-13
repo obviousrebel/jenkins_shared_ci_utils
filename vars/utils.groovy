@@ -418,7 +418,13 @@ def buildAndTest(config, index) {
             } // end test test_cmd finally clause
         } // end if(config.test_cmds...)
         // Dump the conda environment definition to a file.
-        def conda_exe = sh(script:"which conda", returnStdout:true)
+        def conda_exe = ''
+        local_conda = "${env.WORKSPACE}/miniconda/bin/conda"
+        if (fileExists(local_conda)) {
+            conda_exe = local_conda
+        } else {
+            conda_exe = sh(script:"which conda", returnStdout:true)
+        }
         sh(script: "${conda_exe} list --explicit > env_dump_${index}.txt")
 
     } // end withEnv
