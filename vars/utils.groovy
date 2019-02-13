@@ -423,7 +423,7 @@ def buildAndTest(config, index) {
         if (fileExists(local_conda)) {
             conda_exe = local_conda
         } else {
-            conda_exe = sh(script:"which conda", returnStdout:true)
+            conda_exe = sh(script:"which conda", returnStdout:true).trim()
         }
         sh(script: "${conda_exe} list --explicit > env_dump_${index}.txt")
 
