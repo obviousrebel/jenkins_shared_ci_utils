@@ -343,6 +343,7 @@ def stageArtifactory(config) {
             // Submit each request to the Artifactory server
             artifact.data.each { blob ->
                 def bi_temp = server.upload spec: blob.value
+                println("bi_temp: ${bi_temp}")
 
                 // Define retention scheme
                 // Defaults: see DataConfig.groovy
