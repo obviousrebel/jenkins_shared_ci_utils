@@ -1,4 +1,4 @@
-@Library('utils@master') _
+@Library('utils@docker_specfix') _
 
 if (utils.scm_checkout(['skip_disable':true])) return
 
