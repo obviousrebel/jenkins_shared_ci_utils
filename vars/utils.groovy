@@ -580,7 +580,7 @@ def sequentialTasks(tasks) {
     def iter = 0
     for (task in tasks) {
         def localtask = []
-        localtask.add(new java.util.AbstractMap.SimpleImmutableEntry(task.key, tasks.value))
+        localtask.add(new java.util.AbstractMap.SimpleImmutableEntry(task.key, task.value))
         //localtask[task.key] = task.value
         stage("Serial-${iter}") {
             parallel(localtask)
