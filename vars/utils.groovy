@@ -38,7 +38,7 @@ def postGithubIssue(reponame, username, password, subject, message) {
 // @param args  Map containing entries for control of Setup stage.
 //
 // @return skip_job  int  Status of clone step, to be tested to determine
-//                        need to abort from Jenkinsfile. 
+//                        need to abort from Jenkinsfile.
 def scm_checkout(args = ['skip_disable':false]) {
     skip_job = 0
     node('master') {
@@ -169,15 +169,15 @@ def testSummaryNotify(single_issue) {
     while(true) {
        try {
            unstash "${stashcount}.name"
-           unstash "${stashcount}.report" 
+           unstash "${stashcount}.report"
        } catch(Exception) {
            println("All test report stashes retrieved.")
            break
        }
        confname = readFile "${stashcount}.name"
        println("confname: ${confname}")
-       
-       report_hdr = sh(script:"grep 'testsuite errors' *.xml", 
+
+       report_hdr = sh(script:"grep 'testsuite errors' *.xml",
                          returnStdout: true)
        short_hdr = report_hdr.findAll(/(?<=testsuite ).*/)[0]
        short_hdr = short_hdr.split('><testcase')[0]
@@ -274,7 +274,7 @@ def processTestReport(config, index) {
             [$class: 'FailedThreshold', unstableThreshold: "${config.failedUnstableThresh}"],
             [$class: 'FailedThreshold', failureThreshold: "${config.failedFailureThresh}"]],
             tools: [[$class: 'JUnitType', pattern: '*.xml.modified']]])
-    
+
     } else {
         println("No .xml files found in workspace. Test report ingestion skipped.")
     }
@@ -561,16 +561,27 @@ def abortOnGstrings(config) {
     }
 }
 
+@NonCPS
+def mapToList(depmap) {
+    def dlist = []
+    for (def entry2 in depmap) {
+        dlist.add(new java.util.AbstractMap.SimpleImmutableEntry(entry2.key, entry2.value))
+    }
+    dlist
+}
 
 // Run tasks defined for the build nodes in sequential fashion.
 //
 // @param tasks  Map containing groovy code to execute on build nodes.
 def sequentialTasks(tasks) {
     // Run tasks sequentially. Any failure halts the sequence.
+
+
     def iter = 0
     for (task in tasks) {
-        def localtask = [:]
-        localtask[task.key] = task.value
+        def localtask = []
+        localtask.add(new java.util.AbstractMap.SimpleImmutableEntry(task.key, tasks.value))
+        //localtask[task.key] = task.value
         stage("Serial-${iter}") {
             parallel(localtask)
         }
@@ -631,7 +642,7 @@ def run(configs, concurrent = true) {
             } // end node
         }
 
-    } //end closure configs.eachWithIndex 
+    } //end closure configs.eachWithIndex
 
     if (concurrent == true) {
         stage("Matrix") {
